@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+factory_settings["extremeX690sfp_default_levels"] = {
+     'rx': (-10.0,-14.0),
+     'temp': (65.0,75.0),
+}
+
+
+def inventory_extremeX690sfp(info):
+    if info:
+
+        for line in info:
+            name = line[0]
+            port_nr = line[0]
+#            port_nr = ' '.join(line[1:])
+            yield (port_nr, {})
+
+def check_extremeX690sfp(item, params, info):
+
+       for line in info:
+
+
+          deg = u'\xb0'
+          infotext = ''
+          perfdata = []
+          port_nr = ''
+          vendor = ''
+          model = ''
+          wavelength = ''
+          mediatype = ''
+          rx = -40
+          rx_warn = -12
+          rx_crit = -14
+          tx = 0
+          tx_warn = 1.49
+          tx_crit = 2.49
+          temp = 0
+          temp_H_warn = 95
+          temp_H_crit = 100
+          temp_L_warn = 5
+          temp_L_crit = 0
+
+          if line[0] == item:
+
+                if type(params) != dict:
+                   params = { "rx" : params }
+
+                port_nr = line[0]
+                vendor = line[1]
+                tx = float(line[2])
+                tx_warn = float(line[3])
+                tx_crit = float(line[4])
+                rx = float(line[5])
+                rx_warn = float(line[6])
+                rx_crit = float(line[7])
+                model = line[8]
+                wavelength = line[9]
+                temp = float(line[10])
+                temp_H_warn = float(line[11])
+                temp_H_crit = float(line[12])
+                temp_L_warn = float(line[13])
+                temp_L_crit = float(line[14])
+                mediatype = line[15]
+
+                if "rx" in params:
+                    rx_warn,rx_crit = params["rx"]
+
+
+                infotext += 'Vendor: ' + vendor + ', '
+                infotext += 'Model: ' + model + ', '
+                infotext += 'MediaType: ' + mediatype +', '
+                infotext += wavelength + 'nm, '
+                infotext += 'Temp: %.f%sC, ' % (temp,deg)
+                infotext += 'Tx Power: %.1fdBm, ' % (tx)
+                infotext += 'Rx Power: %.1fdBm, ' % (rx)
+
+                perfdata.append(('Rx_Power',rx,rx_warn,rx_crit))
+                perfdata.append(('Tx_Power',tx,tx_warn,tx_crit))
+                perfdata.append(('Temperature',temp,temp_H_warn,temp_H_crit))
+
+                if model == "error":
+                   return (2, "Error or empty slot")
+
+                if rx < rx_crit or rx == "" or rx == 0:
+                   return (2, "Rx power " + infotext, perfdata)
+                if rx < rx_warn:
+                   return (1, "Rx power " + infotext, perfdata)
+                if rx >= rx_warn:
+                   return (0, infotext, perfdata)
+                else:
+                   return (3, 'UNKNOWN - sfp/sfp+/qsfp not found' % port_nr)
+
+
+check_info['extremeX690sfp'] = {
+    'inventory_function'        : inventory_extremeX690sfp,
+    'check_function'            : check_extremeX690sfp,
+    'service_description'       : 'SFP Port %s',
+    'has_perfdata'              : True,
+    'default_levels_variable'   : 'extremeX690sfp_default_levels',
+    'group'                     : 'extremeX690sfp',
+}
