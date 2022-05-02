@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+import sys
+import requests
+import json
+#
+
+
+def main():
+    if len(sys.argv) < 5:
+        print("Usage: agent_extremeX690sfp host user password port\n")
+        return None
+    print("<<<extremeX690sfp>>>")
+    user = sys.argv[2]
+    password = sys.argv[3]
+    host = sys.argv[1]
+    ports = sys.argv[4]
+    ports = ports.split()
+    url = "http://"+host+"/jsonrpc"
+
+    for port in ports:
+        command = "show port "+port+" transceiver information detail"
+        payload = {
+            "method": "cli",
+            "id": "10",
+            "jsonrpc": "2.0",
+            "params": [command],
+        }
+        response = requests.post(url, auth=(
+            user, password), json=payload).json()
+
+        # print(response)
+
+        sfp_data = dict(response["result"][1])
+        sfp = sfp_data["show_ports_transceiver"]
+        sfp_params = dict(sfp)
+        error = 0
+        for sfp_key in sfp_params:
+            # print key
+            # print str(sfp_key)+" "+str(sfp_params[sfp_key])
+            #
+            if sfp_key == 'port':
+                port = str(sfp_params[sfp_key])
+            if sfp_key == 'vendorName':
+                vendor_tmp = str(sfp_params[sfp_key])
+                vendor_tmp = vendor_tmp.strip()
+                vendor = vendor_tmp.replace(" ", "_")
+            if sfp_key == 'rxPower':
+                rx = str(sfp_params[sfp_key])
+            if sfp_key == 'rxPwrLowWarnTshld':
+                rx_warn = str(sfp_params[sfp_key])
+            if sfp_key == 'rxPwrLowAlarmTshld':
+                rx_crit = str(sfp_params[sfp_key])
+            if sfp_key == 'txPower':
+                tx = str(sfp_params[sfp_key])
+            if sfp_key == 'txPwrLowWarnTshld':
+                tx_warn = str(sfp_params[sfp_key])
+            if sfp_key == 'txPwrLowAlarmTshld':
+                tx_crit = str(sfp_params[sfp_key])
+            if sfp_key == 'partNumber':
+                model = str(sfp_params[sfp_key])
+            if sfp_key == 'temp':
+                temp = str(sfp_params[sfp_key])
+            if sfp_key == 'tempHighWarnTshld':
+                temp_H_warn = str(sfp_params[sfp_key])
+            if sfp_key == 'tempHighAlarmTshld':
+                temp_H_crit = str(sfp_params[sfp_key])
+            if sfp_key == 'tempLowWarnTshld':
+                temp_L_warn = str(sfp_params[sfp_key])
+            if sfp_key == 'tempLowAlarmTshld':
+                temp_L_crit = str(sfp_params[sfp_key])
+            if sfp_key == 'mediaType':
+                mediatype = str(sfp_params[sfp_key])
+            if sfp_key == 'wavelength':
+                wave = str(sfp_params[sfp_key])
+            if sfp_key == 'portErrorString':
+                error = 1
+        if error == 1:
+            vendor = "ERROR"
+            tx = "-99"
+            tx_warn = "-12"
+            tx_crit = "-14"
+            rx = "-40"
+            rx_warn = "-12"
+            rx_crit = "-14"
+            model = "error"
+            temp = "0"
+            temp_H_warn = "95"
+            temp_H_crit = "90"
+            temp_L_warn = "5"
+            temp_L_crit = "0"
+            mediatype = "error"
+            wave = "0"
+
+        print("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (port, vendor, tx, tx_warn, tx_crit,
+              rx, rx_warn, rx_crit, model, wave, temp, temp_H_warn, temp_H_crit, temp_L_warn, temp_H_crit, mediatype))
+
+
+if __name__ == "__main__":
+    main()

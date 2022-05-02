@@ -1,0 +1,19 @@
+#!/usr/bin/env python#
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+
+def agent_extremeX690sfp(params, hostname, ipaddress):
+
+    args = ""
+    ports = ""
+
+    args += " " + quote_shell_string(ipaddress)
+    args += " " + quote_shell_string(params["user"])
+    args += " " + quote_shell_string(params["password"])
+    for port in params["port"]:
+        ports += port + " "
+    args += " " + quote_shell_string(ports)
+    #print(args)
+    return args
+
+special_agent_info['extremeX690sfp'] = agent_extremeX690sfp

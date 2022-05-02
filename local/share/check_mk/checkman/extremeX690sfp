@@ -1,0 +1,14 @@
+title: Extreme Networks X690 SFP/SFP+
+agents: extremeX690sfp
+catalog: hw/network/extremeX690sfp
+license: GPL
+distribution: check_mk
+description: Prints SFP/SFP+ info of a Extreme Networks X690
+
+item: None
+
+perfdata: None
+
+inventory: One service per device.
+
+version: 0.2
